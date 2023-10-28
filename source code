@@ -1,0 +1,8 @@
+#!/bin/bash
+if [ $# -ne 1 ]; then
+    echo "usage: $0 argument"
+    exit 1
+fi
+
+mkdir workDir
+echo $1 > workDir/message.txt
