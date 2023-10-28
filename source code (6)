@@ -1,0 +1,28 @@
+#include <cmath>
+
+ComplexNum::ComplexNum(double r, double i) : real(r), imag(i) {}
+ComplexNum ComplexNum::operator+(const ComplexNum& other) const
+{
+    return ComplexNum(real + other.real, imag + other.imag);
+}
+ComplexNum ComplexNum::operator-(const ComplexNum& other) const
+{
+    return ComplexNum(real - other.real, imag - other.imag);
+}
+ComplexNum ComplexNum::operator*(double k) const
+{
+    return ComplexNum(real * k, imag * k);
+}
+double ComplexNum::modulus() const
+{
+    return std::sqrt(real * real + imag * imag);
+}
+std::ostream& operator<<(std::ostream& os, const ComplexNum& num)
+{
+    os << num.real;
+    if (num.imag >= 0)
+        os << "+" << num.imag << "i";
+    else
+        os << num.imag << "i";
+    return os;
+}

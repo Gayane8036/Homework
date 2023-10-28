@@ -1,0 +1,42 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <fstream>
+
+
+
+int main() {
+
+    std::ifstream inputF("input.txt");
+    if (!inputF.is_open()) {
+        std::cerr << "Unable" << std::endl;
+        return 1;
+    }
+
+    std::vector<std::string> lines;
+    std::string currentLine;
+    while (std::getline(inputF, currentLine)) {
+        lines.push_back(currentLine);
+    }
+
+    int numberOfLines = lines.size();
+    std::cout << "Number of lines: " << numberOfLines << std::endl;
+
+    std::ofstream outputFile("output.txt");
+    if (!outputFile.is_open()) {
+        std::cerr << "Unable to open" << std::endl;
+        return 1;
+    }
+
+    for (int i = numberOfLines - 1; i >= 0; i--) {
+        outputFile << lines[i] << std::endl;
+    }
+
+    inputF.close();
+    outputFile.close();
+
+    return 0;
+}
+
+bash: g++ -o program program.cpp
+          ./program

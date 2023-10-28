@@ -1,0 +1,17 @@
+#ifndef COMPLEXNUM_HPP
+#define COMPLEXNUM_HPP
+#include <iostream>
+class ComplexNum
+{
+private:
+    double real;
+    double imag;
+public:
+    ComplexNum(double r, double i);
+    ComplexNum operator+(const ComplexNum& other) const;
+    ComplexNum operator-(const ComplexNum& other) const;
+    ComplexNum operator*(double k) const;
+    double modulus() const;
+    friend std::ostream& operator<<(std::ostream& os, const ComplexNum& num);
+};
+#endif

@@ -1,0 +1,16 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+int main() {
+    std::vector<ComplexNum> complexNums = {{3, 4}, {1, 2}, {5, -1}, {-2, 3}};
+    std::sort(complexNums.begin(), complexNums.end(), [](const ComplexNum& a, const ComplexNum& b)
+    {
+        return a.modulus() < b.modulus();
+    });
+    for (const auto& num : complexNums)
+    {
+        std::cout << num << " ";
+    }
+    std::cout << std::endl;
+    return 0;
+}
