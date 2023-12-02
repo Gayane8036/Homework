@@ -1,0 +1,36 @@
+#include <iostream>
+#include <cstdlib>
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <cstring>
+
+void buildEratosthenesLattice(int *array, int size) {
+}
+int main() {
+    const char *name = "/my_shared_memory";
+    const int SIZE = 1000 * sizeof(int);
+    int shm_fd = shm_open(name, O_RDWR, 0666);
+    if (shm_fd == -1) {
+        perror("404");
+        exit(EXIT_FAILURE);
+    }
+    int *array = static_cast<int*>(mmap(0, SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0));
+    if (array == MAP_FAILED) {
+        perror("404");
+        exit(EXIT_FAILURE);
+    }
+    buildEratosthenesLattice(array, SIZE / sizeof(int));
+
+    if (munmap(array, SIZE) == -1) {
+        perror("404");
+        exit(EXIT_FAILURE);
+    }
+    if (close(shm_fd) == -1) {
+        perror("404");
+        exit(EXIT_FAILURE);
+    }
+
+    return 0;
+}
