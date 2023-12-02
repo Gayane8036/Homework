@@ -1,0 +1,19 @@
+CC = g++
+CFLAGS = -Wall
+
+all: init destroy set check
+
+init: mek.cpp
+    $(CC) $(CFLAGS) -o init mek.cpp -lrt
+
+destroy: erku.cpp
+    $(CC) $(CFLAGS) -o destroy erku.cpp -lrt
+
+set: ereq.cpp
+    $(CC) $(CFLAGS) -o set ereq.cpp -lrt
+
+check: chors.cpp
+    $(CC) $(CFLAGS) -o check chors.cpp -lrt
+
+clean:
+    rm -f init destroy set check
