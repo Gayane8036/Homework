@@ -1,0 +1,49 @@
+#include <iostream>
+#include <thread>
+#include <mutex>
+
+class BankAccount {
+public:
+    BankAccount(int initial_balance) : balance(initial_balance) {}
+
+    void debit(int amount) {
+        std::lock_guard<std::mutex> lock(mtx);
+        balance -= amount;
+    }
+
+    void credit(int amount) {
+        std::lock_guard<std::mutex> lock(mtx);
+        balance += amount;
+    }
+
+    int getBalance() {
+        return balance;
+    }
+
+private:
+    int balance;
+    std::mutex mtx;
+};
+
+void trans(BankAccount& account, int debit_amount, int credit_amount) {
+    account.debit(debit_amount);
+    account.credit(credit_amount);
+}
+
+int main() {
+    BankAccount account(2000);
+
+    int debit_amount = 300;
+    int credit_amount = 400;
+    const int num_threads = 10;
+    std::thread threads[num_threads];
+    for (int i = 0; i < num_threads; ++i) {
+        threads[i] = std::thread(trans, std::ref(account), debit_amount, credit_amount);
+    }
+    for (int i = 0; i < num_threads; ++i) {
+        threads[i].join();
+    }
+    std::cout << "Final Balance: " << account.getBalance() << std::endl;
+
+    return 0;
+}
