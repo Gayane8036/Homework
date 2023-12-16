@@ -1,0 +1,61 @@
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <pthread.h>
+#include <vector>
+
+using namespace std;
+
+struct app {
+    int num_1;
+    int num_2;
+    string operation;
+    int thread_num;
+};
+
+void* perform_operation(void* arg) {
+    app* number = static_cast<app*>(arg);
+    int result = 0;
+
+    if (number->operation == "s") {
+        result = number -> num_1 + number -> num_2;
+    } else if (number -> operation == "m") {
+        result = number -> num_1 * number -> num_2;
+    } else if (number -> operation == "ss") {
+        result = (number -> num_1 * number -> num_1) + (number -> num_2 * number -> num_2);
+    }
+
+    stringstream output;
+    output << number -> num_1 << " " << number -> operation << " " << number -> num_2 << " = " << result;
+
+    string filename = "out_" + to_string(number->thread_num) + ".txt";
+    ofstream outfile(filename);
+    if (outfile.is_open()) {
+        outfile << output.str();
+        outfile.close();
+    } else {
+        cout << "404";
+    }
+
+    pthread_exit(NULL);
+}
+
+int main() {
+    int N;
+    cout << " number of operations: ";
+    cin >> N;
+
+    vector<pthread_t> threads(N);
+    vector<app> app_d(N);
+
+    for (int i = 0; i < N; ++i) {
+        cin >> app_d[i].num_1 >> app_d[i].num_2 >> app_d[i].operation;
+        app_d[i].thread_num = i + 1;
+        pthread_create(&threads[i], NULL, perform_operation, &app_d[i]);
+    }
+
+    for (int i = 0; i < N; ++i) {
+        pthread_join(threads[i], NULL);
+    }
+    return 0;
+}
