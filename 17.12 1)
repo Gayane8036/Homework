@@ -1,0 +1,90 @@
+#include <iostream>
+#include <vector>
+#include <pthread.h>
+#include <mutex>
+#include <atomic>
+#include <chrono>
+#include <semaphore.h>
+
+class Number {
+public:
+    int x = 0;
+};
+
+std::mutex mtx;
+void* example_mutex(void* arg) {
+    Number* num = (Number*)arg;
+    for (int i = 0; i < 10000; ++i) {
+        mtx.lock();
+        num->x++;
+        mtx.unlock();
+    }
+    return nullptr;
+}
+
+std::atomic_flag spinlock = ATOMIC_FLAG_INIT;
+void* example_spinlock(void* arg) {
+    Number* num = (Number*)arg;
+    for (int i = 0; i < 10000; ++i) {
+        while (spinlock.test_and_set(std::memory_order_acquire));
+        num->x++;
+        spinlock.clear(std::memory_order_release);
+    }
+    return nullptr;
+}
+
+sem_t semaphore;
+void* example_semaphore(void* arg) {
+    Number* num = (Number*)arg;
+    for (int i = 0; i < 10000; ++i) {
+        sem_wait(&semaphore);
+        num->x++;
+        sem_post(&semaphore);
+    }
+    return nullptr;
+}
+
+int main(int argc, char** argv) {
+    Number* num = new Number();
+    num->x = 2;
+    std::vector<pthread_t> tids(20);
+
+    auto start_mutex = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < 20; ++i) {
+        pthread_create(&tids[i], NULL, example_mutex, (void*)num);
+    }
+
+    for (int i = 0; i < 20; ++i) {
+        pthread_join(tids[i], NULL);
+    }
+    auto end_mutex = std::chrono::high_resolution_clock::now();
+    std::cout << "Mutex Time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end_mutex - start_mutex).count() << "ms" << std::endl;
+
+    auto start_spinlock = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < 20; ++i) {
+        pthread_create(&tids[i], NULL, example_spinlock, (void*)num);
+    }
+
+    for (int i = 0; i < 20; ++i) {
+        pthread_join(tids[i], NULL);
+    }
+    auto end_spinlock = std::chrono::high_resolution_clock::now();
+    std::cout << "Spinlock Time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end_spinlock - start_spinlock).count() << "ms" << std::endl;
+
+    sem_init(&semaphore, 0, 1);
+    auto start_semaphore = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < 20; ++i) {
+        pthread_create(&tids[i], NULL, example_semaphore, (void*)num);
+    }
+
+    for (int i = 0; i < 20; ++i) {
+        pthread_join(tids[i], NULL);
+    }
+    auto end_semaphore = std::chrono::high_resolution_clock::now();
+    std::cout << "Semaphore Time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end_semaphore - start_semaphore).count() << "ms" << std::endl;
+
+    std::cout << num->x << std::endl;
+    delete num;
+
+    return 0;
+}
